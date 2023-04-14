@@ -1,0 +1,1 @@
+-e git+https://github.com/mjiggidy/timecode.git@c895a911bf7d3cbab006919c3fa5988447d04b86#egg=Timecode

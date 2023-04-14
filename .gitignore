@@ -1,3 +1,15 @@
+# 2023 and we still have these
+.DS_Store
+
+# tests
+examples
+
+# venv
+bin
+include
+lib
+pyvenv.cfg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
