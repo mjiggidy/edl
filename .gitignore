@@ -1,8 +1,9 @@
 # 2023 and we still have these
 .DS_Store
 
-# tests
+# Secrets for me
 examples
+docs
 
 # venv
 bin
