@@ -1,7 +1,28 @@
-from posttools import edl
 import sys
+import edl
+from rich.console import Console
+from rich.text import Text
+from rich.style import Style
+
+
+def events_match(event_source:edl.events.Event, event_compare:edl.events.Event) -> bool:
+	"""Should match source set and record TC I guess"""
+
+	return all([
+		{s.name.lower() for s in event_source.sources} == {s.name.lower() for s in event_compare.sources},
+		event_source.timecode_extents == event_compare.timecode_extents
+	])
+
+def formatted_event(event:edl.events.Event) -> str:
+
+	return f"{event.event_number}: {[f'{s.source}' for s in event.standard_statements]}   {event.timecode_extents}"
 
 if __name__ == "__main__":
+
+	console = Console(highlight=False)
+	style_warning = Style(bgcolor="yellow")
+	style_matched = Style(bgcolor="green")
+	style_nomatch = Style(bgcolor="red")
 
 	if len(sys.argv) < 3:
 		sys.exit(f"Usage: {__file__} list1.edl list2.edl")
@@ -15,24 +36,59 @@ if __name__ == "__main__":
 	
 	except Exception as e:
 		sys.exit(f"Trouble parsing EDL: {e}")
-	
-	count_good = 0
-	count_bad  = 0
-	
-	print("")
 
-	for event_src, event_comp in zip(edl_source.events, edl_comp.events):
-		reel_src = event_src.reel.lower().rstrip(".mov")
-		reel_comp = event_comp.reel.lower().rstrip(".mov")
+	print(f"Comparing source EDL {edl_source.title} against {edl_comp.title}")
 
-		if event_src.tc_record.start != event_comp.tc_record.start:
-			print(f"Timecode fell off at {event_src.tc_record.start} / {reel_src} vs {event_comp.tc_record.start} / {reel_comp}")
-			count_bad += 1
-		elif reel_src != reel_comp:
-			count_bad += 1
-			print(f"[{event_src.tc_record.start}] {reel_src}  vs  {reel_comp}")
+	matched_events = []
+	unmatched_events = []
+	skipped_events = []
+
+	source_events = iter(edl_source.events)
+	compare_events = iter(edl_comp._events)
+
+	event_source = next(source_events)
+	event_compare = next(compare_events)
+
+	while event_source and event_compare:
+
+
+		while event_source.timecode_extents.start != event_compare.timecode_extents.start:
+
+			console.print("")
+
+			# If no longer tracking record TC, try to catch up
+			if event_source.timecode_extents.start < event_compare.timecode_extents.start:
+				skipped_events.append(event_source)
+				console.print(Text("Skipping source event: ", style=style_warning))
+				console.print(Text(formatted_event(event_source)))
+				event_source = next(source_events)
+			else:
+				skipped_events.append(event_compare)
+				console.print(Text("Skipping compared event: ", style=style_warning))
+				console.print(formatted_event(event_compare))
+				event_compare = next(compare_events)
+
+		console.print("")
+
+		if events_match(event_source, event_compare):
+			matched_events.append(event_source)
+			console.print(Text("Matched:", style=style_matched))
+		
 		else:
-			count_good += 1
-	
-	print("\n---")
-	print(f"{count_good} were good; {count_bad} were weird.")
+			unmatched_events.append(event_source)
+			console.print(Text("Not matched:", style=style_nomatch))
+
+		console.print(formatted_event(event_source))
+		console.print(formatted_event(event_compare))
+
+		try:
+			event_source = next(source_events)
+			event_compare = next(compare_events)
+		except StopIteration:
+			break
+
+		
+
+		
+	console.print("")
+	console.print(f"{len(matched_events)} matched; {len(unmatched_events)} not matched; {len(skipped_events)} skipped")
