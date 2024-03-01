@@ -8,8 +8,12 @@ class Event:
 	def __init__(self, standard_statements:typing.Iterable[StandardFormStatement], note_statements:typing.Optional[typing.Iterable["NoteFormStatement"]]=None, comments=typing.Optional[typing.Iterable[BaseComment]]):
 
 		self._sfs = list(standard_statements)
+		
 		if not len(self._sfs):
 			raise ValueError(f"An event must contain at least one standard form statement (zero were given)")
+		elif len(set(e.event_number for e in self._sfs)) != 1:
+			raise ValueError(f"Standard Form Statements have non-matching event numbers")
+
 		self._nfs = note_statements if note_statements else []
 		
 		fcm = {s.fcm for s in self._sfs}
@@ -75,6 +79,12 @@ class Event:
 		raise ValueError(f"Unrecognized line")
 
 		
+	@property
+	def event_number(self) -> int:
+		"""The event number"""
+
+		return self._sfs[0].event_number
+	
 	@property
 	def tracks(self) -> typing.Set["Track"]:
 		"""The track(s) this event belongs to"""
