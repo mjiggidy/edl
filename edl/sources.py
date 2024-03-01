@@ -65,10 +65,11 @@ class TapeSource(SourceReel):
 
 	def __init__(self, reel_name:str):
 
+		super().__init__()
+		
 		if not self.validate(reel_name):
 			raise ValueError(f"Reel name contains invalid characters for this source type")
 
-		super().__init__()
 		self._NAME = reel_name
 
 	@classmethod

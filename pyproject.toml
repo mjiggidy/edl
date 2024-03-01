@@ -1,0 +1,20 @@
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/#declaring-project-metadata
+
+[project]
+name = "edl"
+description = "EDL Things"
+authors = [{name = "Michael Jordan", email = "michael@glowingpixel.com"}]
+
+version = "0.0a1"
+
+readme = "README.md"
+license = {file = "LICENSE"}
+
+#dependencies = ["pyavb","timecode@git+https://github.com/mjiggidy/timecode.git#egg=timecode"]
+
+#[tool.setuptools.packages.find]
+#include = ["edl"]
+
+# https://stackoverflow.com/questions/69647590/specifying-package-data-in-pyproject-toml
+#[tool.setuptools.packages.find]
+#where = ["avbutils"]
