@@ -10,4 +10,5 @@ from .nfm import *
 
 # Then these need those
 from .events import *
-from .edl import *
+from .record import RecordEvent
+from .edl import Edl

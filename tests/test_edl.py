@@ -8,9 +8,9 @@ def show_stats(edl:Edl):
 	
 	print(f"EDL Title: {edl.title}")
 	print(f"EDL FCM: {edl.fcm.value}")
-	print(f" - Contains {len(edl.tracks)} tracks ({len([t for t in edl.tracks if t.type is Track.Type.VIDEO])} video; {len([t for t in edl.tracks if t.type is Track.Type.AUDIO])} audio)")
-	print(f" - Contains {len(edl.events)} events")
-	print(f" - Contains {len(edl.sources)} unique sources:")
+	print(f" - Contains {len(list(edl.tracks))} tracks ({len([t for t in edl.tracks if t.type is Track.Type.VIDEO])} video; {len([t for t in edl.tracks if t.type is Track.Type.AUDIO])} audio)")
+	print(f" - Contains {len(list(edl.events))} events")
+	print(f" - Contains {len(list(edl.sources))} unique sources:")
 	print("===")
 
 	print(edl)

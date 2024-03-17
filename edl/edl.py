@@ -1,5 +1,5 @@
 import typing, io
-from . import SourceReel, Track, Fcm, Event
+from . import SourceReel, Track, Fcm, Event, RecordEvent
 	
 class Edl:
 	"""An Edit Decision List"""
@@ -13,7 +13,9 @@ class Edl:
 
 		self.title = title
 		self.fcm   = fcm
-		self._events = list(events) if events else []
+		self._source_events = list(events) if events else []
+
+		self._record_timeline = [RecordEvent(event, event.timecode_extents) for event in self._source_events]
 
 	@classmethod
 	def from_file(cls, file_edl:io.BufferedReader):
@@ -155,17 +157,17 @@ class Edl:
 		return header
 	
 	@property
-	def tracks(self) -> list[Track]:
+	def tracks(self) -> typing.Iterator[Track]:
 		"""The tracks used in this EDL"""
 		tracks = set()
 		for e in self.events:
 			tracks = tracks.union(e.tracks)
-		return tracks
+		yield from tracks
 	
 	@property
-	def events(self) -> list[Event]:
+	def events(self) -> typing.Iterator[Event]:
 		"""An EDL event"""
-		return self._events
+		yield from self._record_timeline
 	
 	@property
 	def sources(self) -> set[SourceReel]:
