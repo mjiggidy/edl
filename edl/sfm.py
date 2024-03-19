@@ -68,6 +68,11 @@ class StandardFormStatement(abc.ABC):
 
 		return event_number, reel_name, tracks, timecode_source, timecode_record
 	
+	@abc.abstractclassmethod
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		"""Format an event for EDL"""
+		pass
+	
 	@property
 	def source(self) -> SourceReel:
 		"""The source reel referenced for this statement"""
@@ -142,9 +147,12 @@ class CutStatement(StandardFormStatement):
 			event_number = event_number
 		)
 	
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		return f"{str(event_number).zfill(3)}  {str(self)} {timecode_record.start} {timecode_record.end}"
+	
 	def __str__(self):
 		# TODO: Additional formatting options (spacing, number padding)
-		return f"{str(self.event_number if self.event_number is not None else 1).zfill(3)}  {self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  C       {self.timecode_source.start} {self.timecode_source.end} {self.timecode_record.start} {self.timecode_record.end}"
+		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  C       {self.timecode_source.start} {self.timecode_source.end}"
 
 class DissolveStatement(StandardFormStatement):
 	"""A dissolve statement"""
@@ -193,9 +201,12 @@ class DissolveStatement(StandardFormStatement):
 			event_number = event_number
 		)
 
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		return f"{str(event_number).zfill(3)}  {str(self)} {timecode_record.start} {timecode_record.end}"
+
 	def __str__(self):
 		# TODO: Additional formatting options
-		return f"{str(self.event_number if self.event_number is not None else 1).zfill(3)}  {self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  D  {str(self.dissolve_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end} {self.timecode_record.start} {self.timecode_record.end}"
+		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  D  {str(self.dissolve_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end}"
 
 class WipeStatement(StandardFormStatement):
 	"""A wipe statement"""
@@ -251,9 +262,12 @@ class WipeStatement(StandardFormStatement):
 		"""CMX Wipe ID"""
 		return self._wipe_id
 	
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		return f"{str(event_number).zfill(3)}  {str(self)} {timecode_record.start} {timecode_record.end}"
+	
 	def __str__(self):
 		# TODO: Additional formatting options
-		return f"{str(self.event_number if self.event_number is not None else 1).zfill(3)}  {self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  W{str(self.wipe_id).zfill(3)}  {str(self.wipe_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end} {self.timecode_record.start} {self.timecode_record.end}"
+		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  W{str(self.wipe_id).zfill(3)}  {str(self.wipe_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end}"
 
 class KeyForegroundStatement(StandardFormStatement):
 	"""The edit includes a key"""
@@ -301,10 +315,13 @@ class KeyForegroundStatement(StandardFormStatement):
 			timecode_record = timecode_record,
 			event_number = event_number
 		)
+	
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		return f"{str(event_number).zfill(3)}  {str(self)} {timecode_record.start} {timecode_record.end}"
 
 	def __str__(self):
 		# TODO: Additional formatting options
-		return f"{str(self.event_number if self.event_number is not None else 1).zfill(3)}  {self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  K  {str(self.dissolve_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end} {self.timecode_record.start} {self.timecode_record.end}"
+		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  K  {str(self.dissolve_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end}"
 	
 
 class KeyBackgroundStatement(StandardFormStatement):
@@ -353,7 +370,10 @@ class KeyBackgroundStatement(StandardFormStatement):
 			timecode_record = timecode_record,
 			event_number = event_number
 		)
+	
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange) -> str:
+		return f"{str(event_number).zfill(3)}  {str(self)} {timecode_record.start} {timecode_record.end}"
 
 	def __str__(self):
 		# TODO: Additional formatting options
-		return f"{str(self.event_number if self.event_number is not None else 1).zfill(3)}  {self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  K B  {'(F)' if self.has_fade_condition else '   '}  {self.timecode_source.start} {self.timecode_source.end} {self.timecode_record.start} {self.timecode_record.end}"
+		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  K B  {'(F)' if self.has_fade_condition else '   '}  {self.timecode_source.start} {self.timecode_source.end}"

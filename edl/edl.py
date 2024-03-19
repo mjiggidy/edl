@@ -13,9 +13,8 @@ class Edl:
 
 		self.title = title
 		self.fcm   = fcm
-		self._source_events = list(events) if events else []
 
-		self._record_timeline = [RecordEvent(event, event.timecode_extents) for event in self._source_events]
+		self._record_timeline:list[RecordEvent] = [RecordEvent(event, event.timecode_extents) for event in events]
 
 	@classmethod
 	def from_file(cls, file_edl:io.BufferedReader):
@@ -110,8 +109,8 @@ class Edl:
 		"""Write the EDL to a given stream"""
 
 		print(self.header, file=file)
-		for event in self.events:
-			print(event, file=file)
+		for idx, event in enumerate(sorted(self._record_timeline, key=lambda e: e.timecode_extents.start)):
+			print(event.event._format_event(event_number=idx+1, timecode_record=event.timecode_extents), file=file)
 
 	@property
 	def title(self) -> str:
@@ -166,8 +165,15 @@ class Edl:
 	
 	@property
 	def events(self) -> typing.Iterator[Event]:
-		"""An EDL event"""
-		yield from self._record_timeline
+		"""Events in this EDL"""
+		return {e.event for e in self._record_timeline}
+	
+	@property
+	def get_event(self, event_number:int) -> RecordEvent:
+		"""Get an event by its event number"""
+		# TODO: Harden this suckah
+
+		return self._record_timeline[event_number-1]
 	
 	@property
 	def sources(self) -> set[SourceReel]:

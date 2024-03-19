@@ -136,11 +136,20 @@ class Event:
 		"""Does this event reference a given source"""
 		return source in self.sources
 	
+	def _format_event(self, event_number:int, timecode_record:TimecodeRange):
+		"""Format an event for record"""
+		
+		return "\n".join([
+			"\n".join(s._format_event(event_number, timecode_record) for s in self.standard_statements),
+			"\n".join(str(n) for n in self.note_statements),
+			"\n".join(str(c) for c in self.comments)
+		])
+	
 	def __str__(self) -> str:
 		# TODO: Add the rest
 
 		return "\n".join([
-			"\n".join(str(s) for s in self._sfs),
-			"\n".join(str(n) for n in self._nfs),
+			"\n".join(str(s) for s in self.standard_statements),
+			"\n".join(str(n) for n in self.note_statements),
 			"\n".join(str(c) for c in self.comments)
 		])
