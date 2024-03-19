@@ -1,7 +1,9 @@
 from timecode import Timecode, TimecodeRange
 from . import Event
 
-# TODO: Record list: Using dict with `TimecodeRange` as keys or something?
+# TODO: Record list: Using dict with `TimecodeRange` as keys or something?  -- Naaah, not yet at least
+
+# TODO: How to get record TC and event numbers out of source events completely?
 
 class RecordEvent:
 	"""An EDL consists of record events which reference SFMs and place them in order or something"""
