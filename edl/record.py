@@ -1,3 +1,5 @@
+"""Record timeline... this is #TODO/#TORECONSIDER"""
+
 from timecode import Timecode, TimecodeRange
 from . import Event
 

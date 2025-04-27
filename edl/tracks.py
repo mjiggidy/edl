@@ -1,3 +1,5 @@
+"""EDL Tracks"""
+
 import enum, functools
 
 @functools.total_ordering

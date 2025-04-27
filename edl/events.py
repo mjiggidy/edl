@@ -1,3 +1,9 @@
+"""
+An EDL Event
+
+An EDL event represents a single edit event, including its SFM, tracks(?), NFMs, and comments
+"""
+
 import typing
 from timecode import Timecode, TimecodeRange
 from . import StandardFormStatement, NoteFormStatement, SourceReel, Track, Fcm, BaseComment

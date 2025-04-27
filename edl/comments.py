@@ -1,10 +1,16 @@
+"""
+EDL Comment Types
+
+This represents metadata associated with an event that does not directly affect record length
+"""
+
 import abc, re, typing
 
 class BaseComment(abc.ABC):
 	"""Base class for a given EDL comment"""
 
 	@classmethod
-	def all_statement_types(cls) -> typing.Generator["BaseComment", None, None]:
+	def all_statement_types(cls) -> typing.Iterator["BaseComment"]:
 		"""Return all subclasses of this type of statement"""
 
 		for statement in cls.__subclasses__():
@@ -12,7 +18,7 @@ class BaseComment(abc.ABC):
 			yield statement
 
 	@abc.abstractclassmethod
-	def from_string(cls, line:str) -> "BaseComment":
+	def from_string(cls, line:str) -> typing.Self:
 		"""Parse a comment from a given string"""
 
 	@classmethod
@@ -29,6 +35,7 @@ class FieldComment(BaseComment):
 	"""An EDL comment with a field name and value"""
 
 	# TODO: Marker lists hate it!
+	# TODO: Maybe subclass THIS for known types, such as LOC for markers?
 
 	PAT_MATCH = re.compile(r"^\*\s*[^\s]+.*\:\s*[^\s]+.*$")
 
@@ -44,7 +51,7 @@ class FieldComment(BaseComment):
 		))
 	
 	@classmethod
-	def from_string(cls, line:str) -> "FieldComment":
+	def from_string(cls, line:str) -> typing.Self:
 
 		parsed = line[1:].split(":", maxsplit=1)
 		return cls(
@@ -54,10 +61,12 @@ class FieldComment(BaseComment):
 	
 	@property
 	def field(self) -> str:
+		"""The field name of the comment"""
 		return self._field
 	
 	@property
 	def value(self) -> str:
+		"""The value of the comment"""
 		return self._value
 	
 	def __str__(self):
@@ -72,7 +81,7 @@ class StandardComment(BaseComment):
 		self._comment = comment
 
 	@classmethod
-	def from_string(cls, line:str) -> "StandardComment":
+	def from_string(cls, line:str) -> typing.Self:
 		return cls(comment=line)
 	
 	@classmethod

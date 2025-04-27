@@ -1,3 +1,9 @@
+"""
+EDL Source Types
+
+This represents master sources that can be used in standard form statements, such as reel names, auxillary (AUX) or black (BL)
+"""
+
 import abc, re
 
 class SourceReel(abc.ABC):

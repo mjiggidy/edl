@@ -1,3 +1,9 @@
+"""
+EDL Note Form Statements
+
+These function as modifiers to the SFM statements, such as speed ramps
+"""
+
 import abc, typing, re
 from timecode import Timecode
 from . import SourceReel
@@ -21,7 +27,7 @@ class NoteFormStatement(abc.ABC):
 	"""
 
 	@classmethod
-	def all_statement_types(cls) -> typing.Generator["NoteFormStatement", None, None]:
+	def all_statement_types(cls) -> typing.Iterator["NoteFormStatement"]:
 		"""Return all subclasses of this type of statement"""
 
 		for statement in cls.__subclasses__():
@@ -67,7 +73,7 @@ class MotionMemoryNoteFormStatement(NoteFormStatement):
 		return self._tc_start
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "MotionMemoryNoteFormStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create an M2 note from a parsed regex string"""
 
 		reel_name = statement.group("reel_name")

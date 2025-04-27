@@ -1,3 +1,9 @@
+"""
+EDL Base Structure
+
+This represents a collection of events, laid out in particular order
+"""
+
 import typing, io
 from . import SourceReel, Track, Fcm, Event, RecordEvent
 	

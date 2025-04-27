@@ -1,3 +1,9 @@
+"""
+EDL Standard Form Statements
+
+SFM statements represent standard edits, dissolves, wipes, and keys
+"""
+
 import abc, typing, re
 from timecode import Timecode, TimecodeRange
 from . import SourceReel, Track, Fcm
@@ -28,7 +34,7 @@ class StandardFormStatement(abc.ABC):
 		self._event_number = int(event_number) if event_number is not None else None
 
 	@classmethod
-	def all_statement_types(cls) -> typing.Generator["StandardFormStatement", None, None]:
+	def all_statement_types(cls) -> typing.Iterator[typing.Self]:
 		"""Return all subclasses of this type of statement"""
 
 		for statement in cls.__subclasses__():
@@ -41,12 +47,12 @@ class StandardFormStatement(abc.ABC):
 		pass
 
 	@abc.abstractclassmethod
-	def parse_from_pattern(self, statement:re.Pattern) -> "StandardFormStatement":
+	def parse_from_pattern(self, statement:re.Pattern) -> typing.Self:
 		"""Create a statement object from a parsed regex object"""
 		pass
 
 	@classmethod
-	def parse_from_string(cls, line:str) -> "StandardFormStatement":
+	def parse_from_string(cls, line:str) -> typing.Self:
 		"""Create a statement object from a given line from an EDL"""
 		pat = cls.PAT_EVENT.match(line)
 		if not pat:
@@ -136,7 +142,7 @@ class CutStatement(StandardFormStatement):
 	, re.I)
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "CutStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create a Cut Statement from a parsed regex string"""
 
 		event_number, reel_name, tracks, timecode_source, timecode_record = super()._parse_shared_elements(statement)
@@ -189,7 +195,7 @@ class DissolveStatement(StandardFormStatement):
 		return self._dissolve_length
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "DissolveStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create a Dissolve Statement from a parsed regex string"""
 
 		event_number, reel_name, tracks, timecode_source, timecode_record = super()._parse_shared_elements(statement)
@@ -239,7 +245,7 @@ class WipeStatement(StandardFormStatement):
 		self._wipe_id     = int(wipe_id)
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "WipeStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create a Dissolve Statement from a parsed regex string"""
 
 		event_number, reel_name, tracks, timecode_source, timecode_record = super()._parse_shared_elements(statement)
@@ -304,7 +310,7 @@ class KeyForegroundStatement(StandardFormStatement):
 		return self._dissolve_length
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "KeyForegroundStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create a KeyForegroundStatement from a parsed regex string"""
 
 		event_number, reel_name, tracks, timecode_source, timecode_record = super()._parse_shared_elements(statement)
@@ -324,7 +330,6 @@ class KeyForegroundStatement(StandardFormStatement):
 	def __str__(self):
 		# TODO: Additional formatting options
 		return f"{self.reel_name.ljust(128)}  {str().join(t.name for t in self.tracks).ljust(3)}  K  {str(self.dissolve_length).zfill(3)}  {self.timecode_source.start} {self.timecode_source.end}"
-	
 
 class KeyBackgroundStatement(StandardFormStatement):
 	"""The edit includes a key"""
@@ -359,7 +364,7 @@ class KeyBackgroundStatement(StandardFormStatement):
 		return self._fade_condition
 
 	@classmethod
-	def parse_from_pattern(cls, statement:re.Pattern) -> "KeyBackgroundStatement":
+	def parse_from_pattern(cls, statement:re.Pattern) -> typing.Self:
 		"""Create a KeyForegroundStatement from a parsed regex string"""
 
 		event_number, reel_name, tracks, timecode_source, timecode_record = super()._parse_shared_elements(statement)
