@@ -1,7 +1,7 @@
 """
 EDL Standard Form Statements
 
-SFM statements represent standard edits, dissolves, wipes, and keys
+SFM statements represent standard edits such as cuts, dissolves, wipes, and keys
 """
 
 import abc, typing, re
