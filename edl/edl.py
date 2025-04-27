@@ -17,44 +17,54 @@ class Edl:
 		self._record_timeline:list[RecordEvent] = [RecordEvent(event, event.timecode_extents) for event in events]
 
 	@classmethod
-	def from_file(cls, file_edl:io.BufferedReader):
+	def from_file(cls, file_path:str) -> typing.Self:
+		"""Read an EDL from an input file path"""
+
+		with open(file_path) as file_handle:
+			return cls.from_stream(file_handle)
+	
+	@classmethod
+	def from_stream(cls, file_edl:io.BufferedReader) -> typing.Self:
 		"""Create an EDL from an input file stream"""
 		
 		events = []
 		event_buffer = []
-		current_index = 0
+		current_event_number = 0
 
 		title = cls._parse_title_from_line(file_edl.readline())
 		
-		# CMX3600: FCM is not given in the header if PAL
+		# 'member where we are, so we can go back in case there's no FCM line 
 		last_pos = file_edl.tell()
+		
+		# CMX3600: FCM is not given in the header if PAL
 		line_fcm = file_edl.readline()
 		if line_fcm.upper().startswith("FCM:"):
 			global_fcm = cls._parse_fcm_from_line(line_fcm)
 		else:
 			global_fcm = Fcm.PAL
+			# Roll back a line
 			file_edl.seek(last_pos)
 
-		for line_num, line_edl in enumerate(l.rstrip('\n') for l in file_edl.readlines()):
+		for line_num, line_edl in enumerate(l.rstrip('\n') for l in file_edl):
 
 			if not line_edl:
 				continue
 
 			try:
 				# If starting next event, process event buffer and flush
-				if event_buffer and cls._is_begin_new_event(line_edl, current_index):
+				if event_buffer and cls._is_begin_new_event(line_edl, current_event_number):
 					events.append(Event.from_string("\n".join(event_buffer)))
 					event_buffer=[]
-					current_index = 0
+					current_event_number = 0
 				
 				# Make note of our current event number if specified
 				if line_edl.split()[0].isnumeric():
-					current_index=int(line_edl.split()[0])
+					current_event_number=int(line_edl.split()[0])
 				
 				event_buffer.append(line_edl)
 
 			except Exception as e:
-				raise ValueError(f"Line {line_num+2}: {e}")
+				raise ValueError(f"Line {line_num+2}: {e}") from e
 		
 		# Take care of the last little feller.
 		# TODO: How to not have to do this?
@@ -64,20 +74,20 @@ class Edl:
 		return cls(title=title, fcm=global_fcm, events=events)
 	
 	@staticmethod
-	def _is_begin_new_event(line:str, current_index:int) -> bool:
+	def _is_begin_new_event(line:str, current_event_number:int) -> bool:
 		"""Determine if we're beginning a new event with this line"""
 
-		if not current_index:
+		if not current_event_number:
 			return False
 
 		first_token = line.split(maxsplit=1)[0]
 		
 		# Encountered prefixed form statement while parsing an event
-		if first_token.lower() in {"FCM:","SPLIT:"}:
+		if first_token.upper() in {"FCM:","SPLIT:"}:
 			return True
 		
 		# Encountered an event number different than the one we been doin'
-		elif first_token.isnumeric() and int(first_token) != current_index:
+		elif first_token.isnumeric() and int(first_token) != current_event_number:
 			return True
 
 		return False
@@ -85,8 +95,10 @@ class Edl:
 	@staticmethod
 	def _parse_title_from_line(line:str) -> str:
 		"""Extract a title from a line in an EDL"""
-		START = "title:"
-		if not line.lower().startswith(START):
+
+		START = "TITLE:"
+
+		if not line.upper().startswith(START):
 			raise ValueError("Title was expected, but not found")
 		title = line[len(START):].strip()
 		if not len(title):
@@ -96,8 +108,10 @@ class Edl:
 	@staticmethod
 	def _parse_fcm_from_line(line:str) -> Fcm:
 		"""Extract the FCM from a line in an EDL"""
-		START = "fcm:"
-		if not line.lower().startswith(START):
+		
+		START = "FCM:"
+
+		if not line.upper().startswith(START):
 			raise ValueError("FCM was expected, but not found")
 		try:
 			fcm = Fcm(line[len(START):].strip())
@@ -158,14 +172,17 @@ class Edl:
 	@property
 	def tracks(self) -> typing.Iterator[Track]:
 		"""The tracks used in this EDL"""
+
 		tracks = set()
 		for e in self.events:
 			tracks = tracks.union(e.tracks)
+
 		yield from tracks
 	
 	@property
 	def events(self) -> typing.Iterator[Event]:
 		"""Events in this EDL"""
+
 		return {e.event for e in self._record_timeline}
 	
 	@property
@@ -178,15 +195,19 @@ class Edl:
 	@property
 	def sources(self) -> set[SourceReel]:
 		"""A set of all sources in the EDL"""
+
 		sources = set()
 		for e in self.events:
 			sources = sources.union(e.sources)
+
 		return sources
 	
-	def __str__(self):
+	def __str__(self) -> str:
+
 		file_text = io.StringIO()
 		self.write(file_text)
+
 		return file_text.getvalue()
 	
-	def __repr__(self):
+	def __repr__(self) -> str:
 		return f"<{self.__class__.__name__} title={self.title} FCM={self.fcm} events={len(self.events)}>"
