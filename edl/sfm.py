@@ -60,10 +60,12 @@ class StandardFormStatement(abc.ABC):
 		reel_name = statement.group("reel_name")
 		tracks = {Track(statement.group("track_type"))}
 		timecode_source = TimecodeRange(
-			start=Timecode(statement.group("tc_src_in")), end=Timecode(statement.group("tc_src_out"))
+			start=Timecode(statement.group("tc_src_in")),
+			end=Timecode(statement.group("tc_src_out"))
 		)
 		timecode_record = TimecodeRange(
-			start=Timecode(statement.group("tc_rec_in")), end=Timecode(statement.group("tc_rec_out"))
+			start=Timecode(statement.group("tc_rec_in")),
+			end=Timecode(statement.group("tc_rec_out"))
 		)
 
 		return event_number, reel_name, tracks, timecode_source, timecode_record
