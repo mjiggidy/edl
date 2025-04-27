@@ -29,10 +29,10 @@ if __name__ == "__main__":
 	
 	try:
 		with open(sys.argv[1]) as edl1:
-			edl_source = edl.Edl.from_file(edl1)
+			edl_source = edl.Edl.from_stream(edl1)
 	
 		with open(sys.argv[2]) as edl2:
-			edl_comp = edl.Edl.from_file(edl2)
+			edl_comp = edl.Edl.from_stream(edl2)
 	
 	except Exception as e:
 		sys.exit(f"Trouble parsing EDL: {e}")
