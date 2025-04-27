@@ -75,4 +75,4 @@ class TapeSource(SourceReel):
 	@classmethod
 	def validate(cls, reel_name:str) -> bool:
 		# TODO: CMX3600: Special characters except comma (,) and space ( ) can occur within reel names
-		return len(reel_name.strip()) and not re.search("[\s]", reel_name)
+		return len(reel_name.strip()) and reel_name.isprintable() and not re.search("[\s]", reel_name)
